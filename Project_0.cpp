@@ -27,9 +27,8 @@ void initialize_decy_table(unordered_map<string , char> &decy_table) {
 string encrypt(string p, unordered_map<char,string>& ency_table){
     string cipher = "";
     for(auto i : p){
-        auto it = ency_table.find(i);
-        if(it != ency_table.end()){ // found
-            cipher += it->second;
+        if(ency_table.find(i) != ency_table.end()){ // found
+            cipher += ency_table[i];
         }
         else{cipher += i;} // if not found
     }
@@ -40,16 +39,21 @@ string decrypt(string c, unordered_map<string,char>& decy_table){
     string p = "";
     string k="";
     int len = c.size();  // no need to divide since char is of 1 byte only
-    for(int i=0;i<=len-3;i+=3){
+    for(int i=0;i<=len;i++){
         // base case
         k = "";  // make it count from starting
+        if(c[i] == '0' || c[i] == '1'){
         k += c[i];
-        k += c[i+1];
-        k += c[i+2];
-        auto it = decy_table.find(k);
-        if(it != decy_table.end()){
-            p += (it->second);
-        }  // else could be updated as required later
+        if(i+1 < len) k+=c[i+1];
+        if(i+2 < len) k+=c[i+2];
+            if(decy_table.find(k) != decy_table.end()){
+                p += decy_table[k];
+            } 
+        i += 2; 
+        }         // if any char not in table
+        else{
+            p += c[i];
+        }
     }
     return p;
 }
@@ -62,7 +66,7 @@ int main(){
     initialize_ency_table(ency_table);
     initialize_decy_table(decy_table);
     // plain text
-    string p = "ADCBCCDE" ;
+    string p = "NSC IS NOT A STUPID COURSE" ;
     string cipher_text = encrypt(p,ency_table);
     cout << "Encryption Process " << endl;
     cout << "Plain text : " << p << endl;
