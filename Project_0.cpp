@@ -1,4 +1,6 @@
 #include <bits/stdc++.h>
+#include <openssl/sha.h>
+
 using namespace std;
 
 void initialize_ency_table( unordered_map<char, string>& ency_table) {
@@ -30,9 +32,26 @@ string encrypt(string p, unordered_map<char,string>& ency_table){
         if(ency_table.find(i) != ency_table.end()){ // found
             cipher += ency_table[i];
         }
-        else{cipher += i;} // if not found
+        // else{cipher += i;} // if not found
     }
+    string hash_cipher = generate_hash(p);
+    cipher += hash_cipher;
     return cipher;
+}
+
+// Hash function to generate a recognizable plaintext
+string generate_hash(const std::string& input) {
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_CTX sha256;
+    SHA256_Init(&sha256);
+    SHA256_Update(&sha256, input.c_str(), input.size());
+    SHA256_Final(hash, &sha256);
+
+    stringstream ss;
+    for (int i = 0; i < 4; ++i) { // First 4 bytes = 8 hex characters
+        ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+    }
+    return ss.str();
 }
 
 string decrypt(string c, unordered_map<string,char>& decy_table){
@@ -66,7 +85,7 @@ int main(){
     initialize_ency_table(ency_table);
     initialize_decy_table(decy_table);
     // plain text
-    string p = "NSC IS NOT A STUPID COURSE" ;
+    string p = "A" ;
     string cipher_text = encrypt(p,ency_table);
     cout << "Encryption Process " << endl;
     cout << "Plain text : " << p << endl;
@@ -74,6 +93,8 @@ int main(){
     cout << "Decryption Process " << endl;
     string decrypt_text = decrypt(cipher_text,decy_table);
     cout << "Plain text : " << decrypt_text << endl;
+    string output22 = generate_hash(p);
+    cout << "Hasher is here " << output22 << " " << endl;;
     return 0;
 
 }
